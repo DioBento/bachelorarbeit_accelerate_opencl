@@ -1,0 +1,4 @@
+#!/bin/bash
+
+export DATA_DIR=/home/hyu/Projects/gpu-rodinia/data
+./opencl-nn filelist.txt -lat 30 -lng 90 -t -f . $@

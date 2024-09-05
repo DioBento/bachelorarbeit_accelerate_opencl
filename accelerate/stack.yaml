@@ -1,0 +1,45 @@
+resolver: lts-21.7
+
+allow-newer: true
+
+packages:
+- accelerate-llvm
+- accelerate-llvm-native
+- accelerate-llvm-ptx
+- accelerate-examples
+
+extra-deps:
+- cuda-0.11.0.1
+- nvvm-0.10.0.1
+
+- github: tmcdonell/accelerate
+  commit: f9eb010ed267357ae0e23d7ddf98186ef2ff5034
+
+- github: llvm-hs/llvm-hs
+  commit: e4b3cfa47e72f094ab109884f18acfc666b0fb7d  # llvm-15
+  # commit: 423220bffac4990d019fc088c46c5f25310d5a33  # llvm-12
+  subdirs:
+    - llvm-hs
+    - llvm-hs-pure
+
+- accelerate-fft-1.3.0.0
+- accelerate-io-1.3.0.0
+- accelerate-io-bytestring-0.1.0.0
+- accelerate-io-bmp-0.1.0.0
+- accelerate-io-repa-0.1.0.0
+- accelerate-io-vector-0.1.0.0
+- cufft-0.10.0.0
+- colour-accelerate-0.4.0.0
+- fclabels-2.0.5.1
+- gloss-accelerate-2.1.0.0
+- gloss-raster-accelerate-2.1.0.0
+- lens-accelerate-0.3.0.0
+- linear-accelerate-0.7.0.0
+- mwc-random-accelerate-0.2.0.0
+- repa-3.4.1.5
+- repa-io-3.4.1.2
+- lens-5.2.2
+
+flags:
+    accelerate-llvm-ptx:
+        nvvm: false
