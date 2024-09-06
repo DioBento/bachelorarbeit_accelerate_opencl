@@ -9,7 +9,6 @@ import Control.Monad (unless)
 import NearestNeighbour
 
 import qualified Data.Array.Accelerate             as A
-import qualified Data.Array.Accelerate.LLVM.PTX    as PTX
 import Data.Array.Accelerate.Examples.Internal     as A
 
 
@@ -34,11 +33,11 @@ main = do
     [ bench "nearest-neighbour" $ whnf (neighbor latLongs lat) lon ]
 
   unless quiet
-    -- (print $ \(idx, dist) -> (show $ names !! id) ++ " " ++ (show $ latLngs !! id) ++ " -> " ++ dist
-    --        $ \idxDist -> (fst $ head $ A.toList idxDist, snd $ head $ A.toList idxDist) -- idk how to accomplish: Scalar (Int, Float) -> (Int, Float)
-    --        $ neighbor latLongs lat lon
-    -- )
-    (putStrLn "hello")
+   (print $ (\(idx, dist) -> (show $ names !! idx) ++ " " ++ (show $ latLngs !! idx) ++ " -> " ++ (show dist))
+          $ (\idxDist -> (fst $ head $ A.toList idxDist, snd $ head $ A.toList idxDist))
+          $ neighbor latLongs lat lon
+   )
+
 
 parseLine :: String -> (String, LatLong)
 parseLine line =
