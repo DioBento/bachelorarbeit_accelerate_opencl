@@ -17,10 +17,10 @@ main = do
   beginMonitoring
   (conf, opts, rest) <- parseArgs options defaults header footer
 
-  let gaussian = gaussianElim (get optBackend opts)
-      size     = get configSize conf
-      verbose  = get configVerbose conf
-      filepath = get configFilePath conf
+  let gaussian = gaussianElim (_optBackend opts)
+      size     = _configSize conf
+      verbose  = _configVerbose conf
+      filepath = _configFilePath conf
 
   (mat, vec) <- getMatVec filepath size
 

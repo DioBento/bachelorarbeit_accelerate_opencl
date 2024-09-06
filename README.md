@@ -49,11 +49,11 @@ Reccomended to run in the executables directory.
 ```sh
 examples:
 # cd /path/to/Bachelorarbeit-Accelerate-OpenCL/opencl/gaussian
-$ ./opencl-gaussian -s 1024 -v --llvm-ptx
+$ ./opencl-gaussian -s 1024 -v
 
 # cd /path/to/Bachelorarbeit-Accelerate-OpenCL/opencl/blur
-$ ./opencl-blur <picture.bmp> --llvm-ptx
+$ ./opencl-blur <picture.bmp>
 
 # cd /path/to/Bachelorarbeit-Accelerate-OpenCL/opencl/nn
-$ ./opencl-nn --llvm-ptx
+$ ./opencl-nn
 ```

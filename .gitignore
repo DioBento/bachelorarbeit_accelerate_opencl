@@ -1,3 +1,7 @@
 accelerate/.stack-work
+accelerate/accelerate-examples/.stack-work/
+accelerate/accelerate-examples/nn/database.txt
+accelerate/accelerate-llvm-native/.stack-work/
+accelerate/accelerate-llvm-ptx/.stack-work/
+accelerate/accelerate-llvm/.stack-work/
 key.txt
-

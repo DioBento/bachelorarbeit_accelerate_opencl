@@ -17,7 +17,7 @@ module Data.Array.Accelerate.Examples.Internal.ParseArgs (
 
   -- * Options processing
   parseArgs,
-  Options, optBackend, optTest, optBenchmark, optCodespeed, optHostname,
+  Options(..), optBackend, _optBackend, optTest, optBenchmark, optCodespeed, optHostname,
   optVariant, optHelp, optCriterion, optTestFramework,
 
   module System.Console.GetOpt,
@@ -304,4 +304,3 @@ parseArgs programOptions programConfig header footer = do
     putStrLn $ unlines $ map ("  "++) no
 
   return (c1, c2 { _optCriterion = c3, _optTestFramework = c4 }, yes ++ non ++ rest)
-

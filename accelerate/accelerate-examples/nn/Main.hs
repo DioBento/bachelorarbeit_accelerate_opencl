@@ -13,19 +13,16 @@ import qualified Data.Array.Accelerate.LLVM.PTX    as PTX
 import Data.Array.Accelerate.Examples.Internal     as A
 
 
-type Location = (String, LatLong)
-
-
 main :: IO ()
 main = do
   beginMonitoring
   (conf, opts, rest) <- parseArgs options defaults header footer
 
-  let neighbor = nearestNeighbor (get optBackend opts)
-      filepath = get configFilePath conf
-      lat      = get configLat conf
-      lon      = get configLong conf
-      quiet    = get configQuiet conf
+  let neighbor = nearestNeighbor (_optBackend opts)
+      filepath = _configFilePath conf
+      lat      = _configLat conf
+      lon      = _configLong conf
+      quiet    = _configQuiet conf
 
   (names, latLngs, size) <- case filepath of
                          Just fpath -> readLocations fpath
@@ -37,11 +34,11 @@ main = do
     [ bench "nearest-neighbour" $ whnf (neighbor latLongs lat) lon ]
 
   unless quiet
-    (print $ \(idx, dist) -> (show $ names !! id) ++ " " ++ (show $ latLngs !! id) ++ " -> " ++ dist
-           $ \idxDist -> (fst $ head $ A.toList idxDist, snd $ head $ A.toList idxDist) -- idk how to accomplish: Scalar (Int, Float) -> (Int, Float)
-           $ neighbor latLongs lat lon
-    )
-
+    -- (print $ \(idx, dist) -> (show $ names !! id) ++ " " ++ (show $ latLngs !! id) ++ " -> " ++ dist
+    --        $ \idxDist -> (fst $ head $ A.toList idxDist, snd $ head $ A.toList idxDist) -- idk how to accomplish: Scalar (Int, Float) -> (Int, Float)
+    --        $ neighbor latLongs lat lon
+    -- )
+    (putStrLn "hello")
 
 parseLine :: String -> (String, LatLong)
 parseLine line =
