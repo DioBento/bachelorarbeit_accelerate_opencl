@@ -17,7 +17,7 @@ module Data.Array.Accelerate.Examples.Internal.ParseArgs (
 
   -- * Options processing
   parseArgs,
-  Options(..), optBackend, _optBackend, optTest, optBenchmark, optCodespeed, optHostname,
+  Options(..), optBackend, optTest, optBenchmark, optCodespeed, optHostname,
   optVariant, optHelp, optCriterion, optTestFramework,
 
   module System.Console.GetOpt,

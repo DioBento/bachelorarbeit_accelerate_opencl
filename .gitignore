@@ -5,3 +5,9 @@ accelerate/accelerate-llvm-native/.stack-work/
 accelerate/accelerate-llvm-ptx/.stack-work/
 accelerate/accelerate-llvm/.stack-work/
 key.txt
+opencl/nn/opencl-nn
+opencl/gaussian/opencl-gaussian
+opencl/blur/opencl-blur
+opencl/blur/cbmp.o
+opencl/blur/helper.o
+opencl/blur/main.o

@@ -268,22 +268,24 @@ int loadData(char *filename,std::vector<Record> &records,std::vector<LatLong> &l
             LatLong latLong;
             fgets(record.recString,49,fp);
             fgetc(fp); // newline
-            if (feof(fp)) break;
 
             // parse for lat and long
             char substr[6];
 
-            for(i=0;i<5;i++) substr[i] = *(record.recString+i+28);
+            for(i=0;i<5;i++) substr[i] = *(record.recString+i+25);
             substr[5] = '\0';
             latLong.lat = atof(substr);
+            printf("substr lat = \"%s\" --> %f\n", substr, latLong.lat);
 
-            for(i=0;i<5;i++) substr[i] = *(record.recString+i+33);
+            for(i=0;i<5;i++) substr[i] = *(record.recString+i+30);
             substr[5] = '\0';
             latLong.lng = atof(substr);
+            printf("substr lon = \"%s\"  --> %f\n", substr, latLong.lng);
 
             locations.push_back(latLong);
             records.push_back(record);
             recNum++;
+            if (feof(fp)) break;
         }
         fclose(fp);
     }

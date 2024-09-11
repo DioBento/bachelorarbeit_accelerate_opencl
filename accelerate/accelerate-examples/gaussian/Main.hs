@@ -25,7 +25,7 @@ main = do
   (mat, vec) <- getMatVec filepath size
 
   runBenchmarks opts rest
-    [ bench "gauss-jordan" $ whnf (gaussian mat) vec ]
+    [ bench "gauss-jordan" $ nf (gaussian mat) vec ]
 
   when verbose
     (print $ gaussian mat vec)

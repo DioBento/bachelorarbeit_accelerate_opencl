@@ -1,5 +1,11 @@
 # Bachelorarbeit Accelerate-OpenCL
 
+Libraries used in this project
+
+1. [Accelerate](https://github.com/AccelerateHS/accelerate) <br>
+    unmodified source (v1.3.0.0) included in `./accelerate/` under `accelerate-llvm`, `accelerate-llvm-native` and `accelerate-llvm-ptx`
+2. [OpenCL](https://www.khronos.org/opencl/)
+
 ## Accelerate
 
 The blur example is taken from an official example on [github](https://github.com/tmcdonell/colour-accelerate/blob/master/examples/Blur.hs).
@@ -32,7 +38,7 @@ $ accelerate-nn --llvm-ptx
 
 ## OpenCL
 
-Some OpenCL examples are taken from [Rodinia Benchmark Suite v3.1](https://github.com/yuhc/gpu-rodinia).
+The Gauss-Jordan and Nearest-Neighbour OpenCL examples are taken from [Rodinia Benchmark Suite v3.1](https://github.com/yuhc/gpu-rodinia).
 
 ### Build and run OpenCL
 
