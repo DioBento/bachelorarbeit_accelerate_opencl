@@ -5,6 +5,7 @@ module Main
 import Prelude as P
 import Data.Char (isSpace)
 import Control.Monad (unless)
+import Data.Label (get)
 
 import Config
 import NearestNeighbour
@@ -18,11 +19,11 @@ main = do
   beginMonitoring
   (conf, opts, rest) <- parseArgs options defaults header footer
 
-  let neighbor = nearestNeighbor (_optBackend opts)
-      -- filepath = _configFilePath conf :: Maybe FilePath
-      lat      = _configLat conf
-      lon      = _configLong conf
-      quiet    = _configQuiet conf
+  let neighbor = nearestNeighbor (get optBackend opts)
+      filepath = _configFilePath conf :: Maybe FilePath
+      lat      = get configLat conf
+      lon      = get configLong conf
+      quiet    = get configQuiet conf
 
   -- (names, latLngs, size) <- case filepath of
   --                        Just fpath -> readLocations fpath

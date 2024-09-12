@@ -13,5 +13,7 @@ $ stack build accelerate-nn
 $ stack install
 
 examples:
-    $ accelerate-nn --llvm-ptx
+    $ accelerate-nn --lat 30 --lon 90 --llvm-ptx
 ```
+
+The executable looks for a database.txt file in the current directory to read the input from.

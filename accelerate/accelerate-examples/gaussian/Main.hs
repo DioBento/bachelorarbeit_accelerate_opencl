@@ -5,7 +5,7 @@ module Main
 import Config
 import Elimination
 import Control.Monad (when, unless)
-import System.IO (readFile)
+import Data.Label (get)
 
 import Prelude                                 as P
 import Data.Array.Accelerate                   as A
@@ -17,12 +17,12 @@ main = do
   beginMonitoring
   (conf, opts, rest) <- parseArgs options defaults header footer
 
-  let gaussian = gaussianElim (_optBackend opts)
-      size     = _configSize conf
-      verbose  = _configVerbose conf
-      filepath = _configFilePath conf
+  let gaussian = gaussianElim (get optBackend opts)
+      size_    = get configSize conf
+      verbose  = get configVerbose conf
+      filepath = get configFilePath conf
 
-  (mat, vec) <- getMatVec filepath size
+  (mat, vec) <- getMatVec filepath size_
 
   runBenchmarks opts rest
     [ bench "gauss-jordan" $ nf (gaussian mat) vec ]
@@ -32,7 +32,7 @@ main = do
 
 
 getMatVec :: Maybe FilePath -> Int -> IO (FMat, FVec)
-getMatVec mFilename size =
+getMatVec mFilename size_ =
     case mFilename of
       Just filename -> do
                      (mat, vec, n) <- readInputFile filename
@@ -40,28 +40,28 @@ getMatVec mFilename size =
                             , fromList (Z :. n) vec
                             )
       Nothing -> do
-        unless (size P.> 0)
+        unless (size_ P.> 0)
                    (error "usage: accelerate-gaussian -v -s n")
-        let mat = createMatrix size
-            vec = P.take size $ repeat 1
-        return ( fromList (Z :. size :. size) mat
-               , fromList (Z :. size) vec
+        let mat = createMatrix size_
+            vec = P.take size_ $ repeat 1
+        return ( fromList (Z :. size_ :. size_) mat
+               , fromList (Z :. size_) vec
                )
 
 
 createMatrix :: Int -> [Float]
-createMatrix size = concat [[coe P.!! (size - 1 - i + j) | j <- [0 .. size - 1]] | i <- [0 .. size - 1]]
+createMatrix size_ = concat [[coe P.!! (size_ - 1 - i + j) | j <- [0 .. size_ - 1]] | i <- [0 .. size_ - 1]]
   where
     lamda   = -0.01 :: Float
-    coe     = [coe_i i | i <- [-(size - 1) .. size - 1]]
+    coe     = [coe_i i | i <- [-(size_ - 1) .. size_ - 1]]
     coe_i i = 10 * exp (lamda * P.fromIntegral (abs i))
 
 
 readInputFile :: FilePath -> IO ([Float], [Float], Int)
 readInputFile filename = do
   contents <- readFile filename
-  let (size:rest) = lines contents
-      n = read size :: Int
+  let (size_:rest) = lines contents
+      n = read size_ :: Int
       matrix = P.map read $ concatMap words (P.take n rest)
       vector = P.map read $ words (rest P.!! n)
   return (matrix, vector, n)

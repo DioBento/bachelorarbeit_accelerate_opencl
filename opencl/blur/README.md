@@ -1,5 +1,7 @@
 # Gaussian Blur <OpenCL>
 
+Using: [cbmp](https://github.com/mattflow/cbmp/tree/master)
+
 **compile with**
 ```sh
 $ make
