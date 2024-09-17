@@ -1,3 +1,4 @@
+accelerate/accelerate-examples/blur/blur_rgb.bmp
 accelerate/.stack-work
 accelerate/accelerate-examples/.stack-work/
 accelerate/accelerate-examples/nn/database.txt
@@ -11,3 +12,4 @@ opencl/blur/opencl-blur
 opencl/blur/cbmp.o
 opencl/blur/helper.o
 opencl/blur/main.o
+opencl/blur/blurred.bmp

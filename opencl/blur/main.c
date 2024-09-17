@@ -5,8 +5,36 @@
 
 #include "helper.h"
 #include "cbmp.h" // https://github.com/mattflow/cbmp/tree/master
+#include "timing.h"
 
 #define MAX_SOURCE_SIZE (0x100000)
+
+struct timeval tv;
+struct timeval tv_total_start, tv_total_end;
+struct timeval tv_init_end;
+struct timeval tv_h2d_start, tv_h2d_end;
+struct timeval tv_d2h_start, tv_d2h_end;
+struct timeval tv_kernel_start, tv_kernel_end;
+struct timeval tv_mem_alloc_start, tv_mem_alloc_end;
+struct timeval tv_close_start, tv_close_end;
+float init_time = 0, mem_alloc_time = 0, h2d_time   = 0, kernel_time= 0,
+      d2h_time  = 0, close_time     = 0, total_time = 0;
+
+
+float eventTime(cl_event event, cl_command_queue command_queue) {
+    cl_int error=0;
+    cl_ulong eventStart,eventEnd;
+    clFinish(command_queue);
+
+    error = clGetEventProfilingInfo(event,CL_PROFILING_COMMAND_START,
+                                    sizeof(cl_ulong),&eventStart,NULL);
+
+    error = clGetEventProfilingInfo(event,CL_PROFILING_COMMAND_END,
+                                    sizeof(cl_ulong),&eventEnd,NULL);
+
+    return (float)((float)(eventEnd-eventStart)/1000000.0f);
+}
+
 
 int
 main(int argc, char *argv[])
@@ -28,6 +56,8 @@ main(int argc, char *argv[])
         } break;
     }
 
+    // time: total start
+    gettimeofday(&tv_total_start, NULL);
 
     // define opencl variables
     cl_platform_id platform;
@@ -36,7 +66,7 @@ main(int argc, char *argv[])
     cl_command_queue queue;
     cl_program program;
     cl_kernel blur;
-    cl_event event = NULL;
+    cl_event writeEvent, kernelEvent, readEvent;
     cl_int err;
 
 
@@ -54,6 +84,10 @@ main(int argc, char *argv[])
     // create command queue
     queue = clCreateCommandQueue(context, device, 0, &err);
 
+    // time: init end
+    gettimeofday(&tv_init_end, NULL);
+    tvsub(&tv_init_end, &tv_total_start, &tv);
+    init_time = (float) tv.tv_sec * 1000.0f + (float) tv.tv_usec / 1000.0f;
 
     // load file and compile kernel code
     FILE *fp;
@@ -98,11 +132,29 @@ main(int argc, char *argv[])
 
     size_t img_size = (size_t) get_width(img) * (size_t) get_height(img);
 
+    // time: mem alloc
+    gettimeofday(&tv_mem_alloc_start, NULL);
+
     cl_mem imgPixels = clCreateBuffer(context, CL_MEM_READ_WRITE, sizeof(pixel) * img_size, NULL, &err);
     cl_mem clWeights = clCreateBuffer(context, CL_MEM_READ_ONLY, sizeof(float) * 9, NULL, &err);
 
-    err  = clEnqueueWriteBuffer(queue, imgPixels, CL_TRUE, 0, sizeof(pixel) * img_size, img->pixels, 0, NULL, NULL);
-    err |= clEnqueueWriteBuffer(queue, clWeights, CL_TRUE, 0, sizeof(float) * 9       , weights, 0, NULL, NULL);
+    // time: mem alloc end
+    gettimeofday(&tv_mem_alloc_end, NULL);
+    tvsub(&tv_mem_alloc_end, &tv_mem_alloc_start, &tv);
+    mem_alloc_time = (float) tv.tv_sec * 1000.0f + (float) tv.tv_usec / 1000.0f;
+
+    err  = clEnqueueWriteBuffer(queue, imgPixels, CL_TRUE, 0, sizeof(pixel) * img_size, img->pixels, 0, NULL, &writeEvent);
+
+    // time: write event 1
+    h2d_time += eventTime(writeEvent, queue);
+    clReleaseEvent(writeEvent);
+
+    err |= clEnqueueWriteBuffer(queue, clWeights, CL_TRUE, 0, sizeof(float) * 9       , weights, 0, NULL, &writeEvent);
+
+    // time: write event 1
+    h2d_time += eventTime(writeEvent, queue);
+    clReleaseEvent(writeEvent);
+
     if (err != CL_SUCCESS) {
         printf("Error: clEnqueueWriteBuffer for imgPixels and/or clWeights failed with error code %d\n", err);
         exit(EXIT_FAILURE);
@@ -121,9 +173,12 @@ main(int argc, char *argv[])
     size_t global_work_size[2] = { (size_t) get_width(img), (size_t) get_height(img) };
     err = clEnqueueNDRangeKernel(
         queue, blur, 2, NULL,
-        global_work_size, NULL, 0, NULL, NULL
+        global_work_size, NULL, 0, NULL, &kernelEvent
     );
-    clWaitForEvents(1, &event);
+
+    // time: kernel
+    kernel_time += eventTime(kernelEvent, queue);
+    clReleaseEvent(kernelEvent);
 
     if (err != CL_SUCCESS) {
         printf("Error: clEnqueueNDRangeKernel failed with error code %d\n", err);
@@ -143,15 +198,11 @@ main(int argc, char *argv[])
         blurred,
         0,
         NULL,
-        NULL
+        &readEvent
     );
 
-    cl_ulong time_start, time_end;
-    cl_ulong total_time;
-    clGetEventProfilingInfo(event, CL_PROFILING_COMMAND_START, sizeof(cl_ulong), &time_start, NULL);
-    clGetEventProfilingInfo(event, CL_PROFILING_COMMAND_END, sizeof(cl_ulong), &time_end, NULL);
-    total_time = (time_end - time_start) / 1000000.0f; // convert nanoseconds to miliseconds
-    printf("Kernel Execution Time: %f ms\n", total_time);
+    // time: reading from gpu
+    d2h_time +=eventTime(readEvent, queue);
 
     if (err != CL_SUCCESS) {
         printf("Error: clEnqueueReadBuffer failed with error code: %d\n", err);
@@ -163,12 +214,28 @@ main(int argc, char *argv[])
     bwrite(img, "blurred.bmp");
     bclose(img);
 
+    // time: close start
+    gettimeofday(&tv_close_start, NULL);
+
     // cleanup
     clReleaseKernel(blur);
     clReleaseProgram(program);
     clReleaseCommandQueue(queue);
     clReleaseContext(context);
 
+    gettimeofday(&tv_close_end, NULL);
+    tvsub(&tv_close_end, &tv_close_start, &tv);
+    close_time += (float) tv.tv_sec * 1000.0f + (float) tv.tv_usec / 1000.0f;
+    tvsub(&tv_close_end, &tv_total_start, &tv);
+    total_time = (float) tv.tv_sec * 1000.0f + (float) tv.tv_usec / 1000.0f;
+
+    printf("Init: %f\n", init_time);
+    printf("MemAlloc: %f\n", mem_alloc_time);
+    printf("HtoD: %f\n", h2d_time);
+    printf("Exec: %f\n", kernel_time);
+    printf("DtoH: %f\n", d2h_time);
+    printf("Close: %f\n", close_time);
+    printf("Total: %f\n", total_time);
 
     return EXIT_SUCCESS;
 }
